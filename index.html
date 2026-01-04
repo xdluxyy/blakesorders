@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blake's Orders</title>
+  <style>
+    :root{
+      --bg0: #070A12;
+      --bg1: #0B1020;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --muted2: rgba(255,255,255,.52);
+
+      --accent: #7C5CFF;
+      --accent2:#33D6FF;
+      --good: #35E6A1;
+      --bad:  #FF5C7A;
+
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.45);
+
+      --r-xl: 28px;
+      --r-lg: 22px;
+      --r-md: 16px;
+      --r-sm: 12px;
+
+      --ease: cubic-bezier(.2,.9,.2,1);
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 900px at 10% 10%, rgba(124,92,255,.25), transparent 55%),
+        radial-gradient(1000px 800px at 90% 30%, rgba(51,214,255,.16), transparent 55%),
+        radial-gradient(800px 600px at 50% 100%, rgba(53,230,161,.08), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    /* Subtle animated grain + glow */
+    .fx{
+      pointer-events:none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(900px 650px at 70% 20%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(700px 550px at 20% 80%, rgba(255,255,255,.05), transparent 60%);
+      mix-blend-mode: screen;
+      opacity: .65;
+      filter: blur(0px);
+      animation: floaty 10s var(--ease) infinite alternate;
+    }
+    @keyframes floaty{
+      from{ transform: translate3d(0,0,0) scale(1); opacity:.55; }
+      to  { transform: translate3d(0,-8px,0) scale(1.02); opacity:.7; }
+    }
+
+    .wrap{
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 18px 70px;
+    }
+
+    header{
+      display:flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border-radius: 999px; /* egg edge */
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      min-width: 220px;
+    }
+
+    .logoMark{
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), transparent 55%),
+        linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 10px 30px rgba(124,92,255,.22);
+      position: relative;
+      overflow:hidden;
+    }
+    .logoMark::after{
+      content:"";
+      position:absolute;
+      inset:-60%;
+      background: radial-gradient(circle, rgba(255,255,255,.24), transparent 55%);
+      transform: rotate(18deg);
+      animation: shine 3.4s var(--ease) infinite;
+      opacity:.7;
+    }
+    @keyframes shine{
+      0%{ transform: translateX(-18%) rotate(18deg); }
+      55%{ transform: translateX(28%) rotate(18deg); }
+      100%{ transform: translateX(28%) rotate(18deg); }
+    }
+
+    .brand h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: .2px;
+      line-height: 1.1;
+    }
+    .brand p{
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .topActions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap: wrap;
+    }
+
+    .search{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      min-width: 240px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+    .search svg{ opacity:.7; }
+    .search input{
+      width:100%;
+      border:none;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size: 13.5px;
+    }
+    .search input::placeholder{ color: rgba(255,255,255,.45); }
+
+    .btn{
+      appearance:none;
+      border: none;
+      cursor: pointer;
+      user-select:none;
+      padding: 11px 14px;
+      border-radius: 999px;
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+      font-weight: 650;
+      letter-spacing: .2px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      white-space: nowrap;
+    }
+    .btn:hover{ transform: translateY(-2px); background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+
+    .btnPrimary{
+      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(51,214,255,.85));
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 18px 44px rgba(124,92,255,.22);
+    }
+    .btnPrimary:hover{ background: linear-gradient(135deg, rgba(124,92,255,1), rgba(51,214,255,.95)); }
+
+    .btnDanger{
+      background: rgba(255,92,122,.14);
+      border-color: rgba(255,92,122,.22);
+    }
+    .btnDanger:hover{
+      background: rgba(255,92,122,.18);
+      border-color: rgba(255,92,122,.30);
+    }
+
+    .btnGhost{
+      background: rgba(0,0,0,.18);
+      border-color: rgba(255,255,255,.12);
+      box-shadow: none;
+    }
+
+    .pillRow{
+      margin-top: 16px;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+    .pill{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+    }
+    .dot{
+      width: 8px; height: 8px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.40);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
+    }
+
+    main{ margin-top: 18px; }
+
+    .grid{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: repeat( auto-fill, minmax(240px, 1fr) );
+      gap: 14px;
+    }
+
+    .card{
+      border-radius: var(--r-xl);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+      border: 1px solid var(--border);
+      overflow:hidden;
+      box-shadow: var(--shadow2);
+      transition: transform .22s var(--ease), border-color .22s var(--ease), background .22s var(--ease);
+      cursor: pointer;
+      position: relative;
+      min-height: 230px;
+    }
+    .card:hover{
+      transform: translateY(-5px);
+      border-color: rgba(255,255,255,.18);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+    }
+
+    .cardTop{
+      height: 120px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(600px 200px at 30% 30%, rgba(255,255,255,.14), transparent 60%),
+        linear-gradient(135deg, rgba(124,92,255,.40), rgba(51,214,255,.18));
+      position: relative;
+    }
+
+    .cardTop img{
+      max-height: 66px;
+      max-width: 68%;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 18px rgba(0,0,0,.35));
+      border-radius: 16px;
+      background: rgba(0,0,0,.10);
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(8px);
+    }
+    .cardTop .fallbackLogo{
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.28), transparent 55%),
+        linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 14px 26px rgba(0,0,0,.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 800;
+      letter-spacing: .5px;
+      color: rgba(255,255,255,.95);
+      text-transform: uppercase;
+    }
+
+    .cardBody{
+      padding: 14px 14px 16px;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .rowBetween{
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .title{
+      font-weight: 800;
+      font-size: 15.5px;
+      letter-spacing: .2px;
+      line-height: 1.15;
+      margin:0;
+    }
+    .sub{
+      margin: 4px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .badge{
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 750;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.20);
+      white-space: nowrap;
+    }
+    .badge.good{
+      border-color: rgba(53,230,161,.30);
+      background: rgba(53,230,161,.14);
+    }
+    .badge.bad{
+      border-color: rgba(255,92,122,.30);
+      background: rgba(255,92,122,.14);
+    }
+
+    .orderBox{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      border-radius: var(--r-lg);
+      padding: 12px 12px;
+      color: rgba(255,255,255,.82);
+      font-size: 13.5px;
+      line-height: 1.35;
+      min-height: 64px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .empty{
+      margin-top: 18px;
+      border-radius: var(--r-xl);
+      padding: 22px;
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+    }
+
+    /* Modal */
+    .overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.58);
+      backdrop-filter: blur(8px);
+      display:none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+      animation: fadeIn .18s var(--ease) both;
+    }
+    .overlay.show{ display:flex; }
+
+    @keyframes fadeIn{
+      from{ opacity: 0; }
+      to{ opacity: 1; }
+    }
+
+    .modal{
+      width: min(860px, 100%);
+      border-radius: 34px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      transform-origin: center;
+      animation: pop .22s var(--ease) both;
+    }
+
+    @keyframes pop{
+      from{ transform: translateY(10px) scale(.98); opacity: .85; }
+      to  { transform: translateY(0px) scale(1); opacity: 1; }
+    }
+
+    .modalHead{
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+    }
+
+    .modalHead .left{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .modalTitle{
+      margin:0;
+      font-size: 14px;
+      font-weight: 850;
+      letter-spacing: .2px;
+    }
+    .modalSub{
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .closeX{
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      cursor: pointer;
+      display:grid;
+      place-items:center;
+      transition: transform .18s var(--ease), background .18s var(--ease);
+    }
+    .closeX:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+    .closeX:active{ transform: translateY(0px) scale(.99); }
+
+    .modalBody{
+      padding: 16px;
+      display:grid;
+      grid-template-columns: 1.1fr 1.4fr;
+      gap: 14px;
+    }
+
+    .panel{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+      overflow:hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+
+    .previewTop{
+      height: 180px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(700px 220px at 20% 30%, rgba(255,255,255,.14), transparent 60%),
+        linear-gradient(135deg, rgba(124,92,255,.38), rgba(51,214,255,.18));
+    }
+
+    .previewTop img{
+      max-width: 76%;
+      max-height: 110px;
+      object-fit: contain;
+      border-radius: 18px;
+      background: rgba(0,0,0,.10);
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      filter: drop-shadow(0 12px 18px rgba(0,0,0,.35));
+      backdrop-filter: blur(8px);
+    }
+
+    .previewInfo{
+      padding: 14px;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bigName{
+      font-size: 18px;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: .2px;
+      line-height: 1.15;
+    }
+
+    .metaLine{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+
+    .divider{
+      height: 1px;
+      background: rgba(255,255,255,.10);
+      margin: 2px 0;
+    }
+
+    .formGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .field label{
+      font-size: 12.5px;
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    .input, .textarea{
+      width:100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      padding: 12px 12px;
+      outline: none;
+      transition: border-color .18s var(--ease), transform .18s var(--ease);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+    .input:focus, .textarea:focus{
+      border-color: rgba(124,92,255,.55);
+      transform: translateY(-1px);
+    }
+    .textarea{ min-height: 124px; resize: vertical; }
+
+    .radioRow{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      cursor:pointer;
+      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+      user-select:none;
+      font-size: 13px;
+      font-weight: 750;
+    }
+    .chip:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); }
+    .chip input{ accent-color: var(--accent); }
+
+    .modalFoot{
+      padding: 14px 16px 16px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.10);
+      display:flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+
+    .footLeft, .footRight{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.52);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(12px);
+      padding: 10px 14px;
+      border-radius: 999px;
+      box-shadow: var(--shadow2);
+      color: rgba(255,255,255,.88);
+      font-size: 13px;
+      display:none;
+      z-index: 70;
+    }
+    .toast.show{ display:block; animation: pop .22s var(--ease) both; }
+
+    @media (max-width: 860px){
+      header{
+        border-radius: 26px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .brand{ width: 100%; justify-content:flex-start; }
+      .topActions{ width:100%; justify-content: space-between; }
+      .search{ min-width: 0; flex: 1; }
+      .modalBody{
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="fx"></div>
+
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logoMark"></div>
+        <div>
+          <h1>Blake’s Orders</h1>
+          <p>Track fast food orders • logos • ratings • edits • vibes</p>
+        </div>
+      </div>
+
+      <div class="topActions">
+        <div class="search" title="Search by restaurant or order text">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 21l-4.2-4.2M10.8 18.6a7.8 7.8 0 1 1 0-15.6 7.8 7.8 0 0 1 0 15.6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input id="searchInput" placeholder="Search orders..." />
+        </div>
+
+        <button class="btn btnGhost" id="exportBtn" title="Export your data to a JSON file">
+          <span>Export</span>
+        </button>
+
+        <button class="btn btnPrimary" id="addBtn">
+          <span>➕ Add New Order</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="pillRow">
+      <div class="pill"><span class="dot"></span><span id="countText">0 orders</span></div>
+      <div class="pill"><span class="dot" style="background: rgba(53,230,161,.7)"></span><span id="likedText">0 liked</span></div>
+      <div class="pill"><span class="dot" style="background: rgba(255,92,122,.7)"></span><span id="dislikedText">0 disliked</span></div>
+      <div class="pill"><span class="dot" style="background: rgba(124,92,255,.7)"></span><span>Click a card to edit/remove</span></div>
+    </div>
+
+    <main>
+      <div id="emptyState" class="empty" style="display:none;">
+        <div style="font-weight:900; font-size:16px; margin-bottom:6px;">No orders yet.</div>
+        <div style="color:rgba(255,255,255,.64); line-height:1.4;">
+          Hit <b>Add New Order</b>, drop in the restaurant name + logo, type your order, and mark whether you liked it.
+        </div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+    </main>
+  </div>
+
+  <!-- Modal Overlay -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Order modal">
+      <div class="modalHead">
+        <div class="left">
+          <div>
+            <p class="modalTitle" id="modalModeTitle">Add New Order</p>
+            <p class="modalSub" id="modalModeSub">Fill it out and submit.</p>
+          </div>
+        </div>
+        <button class="closeX" id="closeBtn" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modalBody">
+        <!-- Preview Panel -->
+        <div class="panel">
+          <div class="previewTop" id="previewTop">
+            <div class="fallbackLogo" id="previewFallback">BO</div>
+            <img id="previewImg" alt="Restaurant logo preview" style="display:none;" />
+          </div>
+          <div class="previewInfo">
+            <h2 class="bigName" id="previewName">Restaurant Name</h2>
+            <div class="metaLine">
+              <span class="badge" id="previewBadge">Liked? —</span>
+              <span style="font-size:12.5px; color: var(--muted);">Stored locally on this device</span>
+            </div>
+            <div class="divider"></div>
+            <div style="color: var(--muted); font-weight: 700; font-size: 12.5px;">Order</div>
+            <div class="orderBox" id="previewOrder">(Your order will show here.)</div>
+          </div>
+        </div>
+
+        <!-- Form Panel -->
+        <div class="panel" style="padding:14px;">
+          <div class="formGrid">
+            <div class="field" style="grid-column: 1 / -1;">
+              <label for="restaurantName">Restaurant name</label>
+              <input class="input" id="restaurantName" placeholder="e.g., Chick-fil-A" maxlength="60"/>
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+              <label for="logoFile">Restaurant logo (upload)</label>
+              <input class="input" id="logoFile" type="file" accept="image/*"/>
+              <div style="font-size:12px; color: rgba(255,255,255,.48); line-height:1.35;">
+                Tip: PNG with transparent background looks the cleanest.
+              </div>
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+              <label for="orderText">Your order</label>
+              <textarea class="textarea" id="orderText" placeholder="Type the order exactly like you'd order it..."></textarea>
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+              <label>Did you like it?</label>
+              <div class="radioRow">
+                <label class="chip">
+                  <input type="radio" name="liked" value="yes" />
+                  ✅ Yes
+                </label>
+                <label class="chip">
+                  <input type="radio" name="liked" value="no" />
+                  ❌ No
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modalFoot">
+        <div class="footLeft">
+          <button class="btn btnDanger" id="removeBtn" style="display:none;">🗑 Remove</button>
+        </div>
+        <div class="footRight">
+          <button class="btn btnGhost" id="cancelBtn">Cancel</button>
+          <button class="btn btnPrimary" id="submitBtn">Submit Order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---------- Utilities ----------
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+    const uid = () => Math.random().toString(16).slice(2) + Date.now().toString(16);
+
+    function toast(msg){
+      const t = $("#toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => t.classList.remove("show"), 1600);
+    }
+
+    function initials(name){
+      const words = String(name || "").trim().split(/\s+/).filter(Boolean);
+      if(!words.length) return "BO";
+      const a = words[0]?.[0] || "";
+      const b = words.length > 1 ? (words[words.length-1]?.[0] || "") : (words[0]?.[1] || "");
+      return (a + b).toUpperCase();
+    }
+
+    // ---------- State ----------
+    const STORAGE_KEY = "blakes_orders_v1";
+    /** @type {Array<{id:string, name:string, logoDataUrl:string|null, order:string, liked:boolean|null, createdAt:number}>} */
+    let orders = [];
+    let activeId = null;       // which order is being viewed/edited
+    let mode = "add";          // "add" or "edit"
+    let pendingLogoDataUrl = null; // for new upload during edit/add
+
+    // ---------- DOM ----------
+    const grid = $("#grid");
+    const emptyState = $("#emptyState");
+
+    const overlay = $("#overlay");
+    const addBtn = $("#addBtn");
+    const closeBtn = $("#closeBtn");
+    const cancelBtn = $("#cancelBtn");
+    const submitBtn = $("#submitBtn");
+    const removeBtn = $("#removeBtn");
+    const exportBtn = $("#exportBtn");
+
+    const searchInput = $("#searchInput");
+
+    const restaurantName = $("#restaurantName");
+    const logoFile = $("#logoFile");
+    const orderText = $("#orderText");
+
+    const previewImg = $("#previewImg");
+    const previewFallback = $("#previewFallback");
+    const previewName = $("#previewName");
+    const previewOrder = $("#previewOrder");
+    const previewBadge = $("#previewBadge");
+    const modalModeTitle = $("#modalModeTitle");
+    const modalModeSub = $("#modalModeSub");
+
+    const countText = $("#countText");
+    const likedText = $("#likedText");
+    const dislikedText = $("#dislikedText");
+
+    // ---------- Persistence ----------
+    function load(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        orders = raw ? JSON.parse(raw) : [];
+        if(!Array.isArray(orders)) orders = [];
+      }catch{
+        orders = [];
+      }
+    }
+
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+      updateStats();
+    }
+
+    // ---------- Rendering ----------
+    function updateStats(){
+      const total = orders.length;
+      const liked = orders.filter(o => o.liked === true).length;
+      const disliked = orders.filter(o => o.liked === false).length;
+
+      countText.textContent = `${total} order${total===1?"":"s"}`;
+      likedText.textContent = `${liked} liked`;
+      dislikedText.textContent = `${disliked} disliked`;
+    }
+
+    function cardTemplate(order){
+      const badgeClass = order.liked === true ? "good" : (order.liked === false ? "bad" : "");
+      const badgeText  = order.liked === true ? "Liked ✅" : (order.liked === false ? "Disliked ❌" : "Liked? —");
+
+      const logoTop = order.logoDataUrl
+        ? `<img src="${order.logoDataUrl}" alt="${escapeHtml(order.name)} logo"/>`
+        : `<div class="fallbackLogo">${escapeHtml(initials(order.name))}</div>`;
+
+      return `
+        <div class="card" data-id="${order.id}" title="Click to view / edit / remove">
+          <div class="cardTop">${logoTop}</div>
+          <div class="cardBody">
+            <div class="rowBetween">
+              <div style="min-width:0;">
+                <p class="title">${escapeHtml(order.name || "Unnamed Restaurant")}</p>
+                <p class="sub">${new Date(order.createdAt).toLocaleString()}</p>
+              </div>
+              <span class="badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="orderBox">${escapeHtml(order.order || "(No order text)")}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function render(){
+      const q = (searchInput.value || "").trim().toLowerCase();
+      const filtered = !q ? orders : orders.filter(o =>
+        (o.name || "").toLowerCase().includes(q) ||
+        (o.order || "").toLowerCase().includes(q)
+      );
+
+      grid.innerHTML = filtered.map(cardTemplate).join("");
+
+      emptyState.style.display = orders.length ? "none" : "block";
+
+      // Bind click events for cards (event delegation)
+      // (No per-card listeners needed)
+    }
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // ---------- Modal Controls ----------
+    function openModal(newMode, id=null){
+      mode = newMode;
+      activeId = id;
+      pendingLogoDataUrl = null;
+      logoFile.value = ""; // reset file input
+
+      overlay.classList.add("show");
+      overlay.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+
+      if(mode === "add"){
+        modalModeTitle.textContent = "Add New Order";
+        modalModeSub.textContent = "Fill it out and submit.";
+        submitBtn.textContent = "Submit Order";
+        removeBtn.style.display = "none";
+
+        restaurantName.value = "";
+        orderText.value = "";
+        $$('input[name="liked"]').forEach(r => r.checked = false);
+
+        updatePreview();
+        restaurantName.focus();
+      }else{
+        const order = orders.find(o => o.id === activeId);
+        if(!order){
+          toast("Couldn’t find that order.");
+          closeModal();
+          return;
+        }
+
+        modalModeTitle.textContent = "Order Details";
+        modalModeSub.textContent = "Edit or remove this order.";
+        submitBtn.textContent = "Save Changes";
+        removeBtn.style.display = "inline-flex";
+
+        restaurantName.value = order.name || "";
+        orderText.value = order.order || "";
+        $$('input[name="liked"]').forEach(r => {
+          r.checked = (order.liked === true && r.value === "yes") || (order.liked === false && r.value === "no");
+        });
+
+        // Preview uses stored logo unless user uploads new one
+        setPreviewLogo(order.logoDataUrl, order.name);
+        updatePreviewTexts();
+      }
+    }
+
+    function closeModal(){
+      overlay.classList.remove("show");
+      overlay.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
+      activeId = null;
+      mode = "add";
+      pendingLogoDataUrl = null;
+    }
+
+    function setPreviewLogo(dataUrl, nameForFallback){
+      if(dataUrl){
+        previewImg.src = dataUrl;
+        previewImg.style.display = "block";
+        previewFallback.style.display = "none";
+      }else{
+        previewImg.removeAttribute("src");
+        previewImg.style.display = "none";
+        previewFallback.textContent = initials(nameForFallback);
+        previewFallback.style.display = "flex";
+      }
+    }
+
+    function getLikedValue(){
+      const picked = $$('input[name="liked"]').find(r => r.checked);
+      if(!picked) return null;
+      return picked.value === "yes";
+    }
+
+    function updatePreviewTexts(){
+      const name = restaurantName.value.trim() || "Restaurant Name";
+      const order = orderText.value.trim() || "(Your order will show here.)";
+      const liked = getLikedValue();
+
+      previewName.textContent = name;
+      previewFallback.textContent = initials(name);
+      previewOrder.textContent = order;
+
+      if(liked === true){
+        previewBadge.textContent = "Liked ✅";
+        previewBadge.className = "badge good";
+      }else if(liked === false){
+        previewBadge.textContent = "Disliked ❌";
+        previewBadge.className = "badge bad";
+      }else{
+        previewBadge.textContent = "Liked? —";
+        previewBadge.className = "badge";
+      }
+    }
+
+    function updatePreview(){
+      // if user uploaded a new logo this session, use it; otherwise in edit mode use existing stored logo.
+      if(pendingLogoDataUrl){
+        setPreviewLogo(pendingLogoDataUrl, restaurantName.value);
+      }else if(mode === "edit"){
+        const order = orders.find(o => o.id === activeId);
+        setPreviewLogo(order?.logoDataUrl ?? null, restaurantName.value);
+      }else{
+        setPreviewLogo(null, restaurantName.value);
+      }
+      updatePreviewTexts();
+    }
+
+    // ---------- CRUD ----------
+    function submit(){
+      const name = restaurantName.value.trim();
+      const order = orderText.value.trim();
+      const liked = getLikedValue();
+
+      if(!name){
+        toast("Restaurant name is required.");
+        restaurantName.focus();
+        return;
+      }
+      if(!order){
+        toast("Order text is required.");
+        orderText.focus();
+        return;
+      }
+      if(liked === null){
+        toast("Mark if you liked it (yes/no).");
+        return;
+      }
+
+      if(mode === "add"){
+        const newOrder = {
+          id: uid(),
+          name,
+          logoDataUrl: pendingLogoDataUrl, // may be null
+          order,
+          liked,
+          createdAt: Date.now()
+        };
+        orders.unshift(newOrder);
+        save();
+        render();
+        toast("Order added.");
+        closeModal();
+      }else{
+        const idx = orders.findIndex(o => o.id === activeId);
+        if(idx === -1){
+          toast("Couldn’t find that order.");
+          return;
+        }
+        const current = orders[idx];
+        orders[idx] = {
+          ...current,
+          name,
+          order,
+          liked,
+          logoDataUrl: pendingLogoDataUrl !== null ? pendingLogoDataUrl : current.logoDataUrl
+        };
+        save();
+        render();
+        toast("Saved changes.");
+        closeModal();
+      }
+    }
+
+    function removeActive(){
+      const idx = orders.findIndex(o => o.id === activeId);
+      if(idx === -1){
+        toast("Couldn’t find that order.");
+        return;
+      }
+      const sure = confirm("Remove this order? This cannot be undone.");
+      if(!sure) return;
+
+      orders.splice(idx, 1);
+      save();
+      render();
+      toast("Removed.");
+      closeModal();
+    }
+
+    // ---------- Export ----------
+    function exportData(){
+      const blob = new Blob([JSON.stringify({ exportedAt: Date.now(), orders }, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "blakes-orders-export.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast("Exported.");
+    }
+
+    // ---------- Events ----------
+    addBtn.addEventListener("click", () => openModal("add"));
+    closeBtn.addEventListener("click", closeModal);
+    cancelBtn.addEventListener("click", closeModal);
+    submitBtn.addEventListener("click", submit);
+    removeBtn.addEventListener("click", removeActive);
+    exportBtn.addEventListener("click", exportData);
+
+    overlay.addEventListener("click", (e) => {
+      // click outside modal closes
+      if(e.target === overlay) closeModal();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if(e.key === "Escape" && overlay.classList.contains("show")) closeModal();
+    });
+
+    // Update preview live
+    restaurantName.addEventListener("input", updatePreview);
+    orderText.addEventListener("input", updatePreview);
+    $$('input[name="liked"]').forEach(r => r.addEventListener("change", updatePreview));
+
+    // File upload -> DataURL
+    logoFile.addEventListener("change", async () => {
+      const file = logoFile.files?.[0];
+      if(!file){
+        pendingLogoDataUrl = null;
+        updatePreview();
+        return;
+      }
+      if(file.size > 2_500_000){
+        toast("Logo file too big. Keep it under ~2.5MB.");
+        logoFile.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingLogoDataUrl = String(reader.result);
+        updatePreview();
+        toast("Logo loaded.");
+      };
+      reader.onerror = () => {
+        toast("Couldn’t read that file.");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Search
+    searchInput.addEventListener("input", render);
+
+    // Click card -> edit modal
+    document.addEventListener("click", (e) => {
+      const card = e.target.closest(".card");
+      if(!card) return;
+      const id = card.getAttribute("data-id");
+      openModal("edit", id);
+    });
+
+    // ---------- Init ----------
+    load();
+    updateStats();
+    render();
+  </script>
+</body>
+</html>
